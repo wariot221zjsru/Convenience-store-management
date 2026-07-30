@@ -1,0 +1,21 @@
+{
+    "products": [
+        {
+            "id": "123",
+            "name": "Genshin",
+            "price": 12.0,
+            "stock": 10,
+            "category": "game"
+        }
+    ],
+    "members": [
+        {
+            "id": "123",
+            "name": "lll",
+            "phone": "12345678910",
+            "points": 0,
+            "register_time": "2026-07-30"
+        }
+    ],
+    "orders": []
+}
