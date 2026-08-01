@@ -4,7 +4,7 @@
             "id": "123",
             "name": "Genshin",
             "price": 12.0,
-            "stock": 10,
+            "stock": 8,
             "category": "game"
         }
     ],
@@ -17,5 +17,30 @@
             "register_time": "2026-07-30"
         }
     ],
-    "orders": []
+    "orders": [
+        {
+            "order_id": "20260801103327",
+            "items": [
+                {
+                    "product_id": "123",
+                    "product_name": "Genshin",
+                    "price": 12.0,
+                    "quantity": 1
+                },
+                {
+                    "product_id": "123",
+                    "product_name": "Genshin",
+                    "price": 12.0,
+                    "quantity": 1
+                }
+            ],
+            "member_phone": null,
+            "member_id": null,
+            "total_amount": 24.0,
+            "real_amount": 24.0,
+            "points": 0,
+            "pay_method": "微信",
+            "trading_hour": "2026-08-01 10:33:27.185922"
+        }
+    ]
 }

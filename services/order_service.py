@@ -63,6 +63,10 @@ class OrderService:
             else:
                 print("商品不存在")
 
+            choice = input("是否还要继续购买商品:(y/n)")
+            if choice.upper() == "N":
+                break
+
     # 展示购物车
     @staticmethod
     def show_cart(cart):
