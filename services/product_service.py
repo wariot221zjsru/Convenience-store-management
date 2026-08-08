@@ -1,14 +1,13 @@
 from models.product import *
-from dao.data_manager import DataManager
+from services.transaction import Transaction, TransactionError
 
 
 class ProductService:
 
-    # 录入商品
+    # 录入商品（事务保护）
     @staticmethod
     def add_product():
         while True:
-
             pid = input("请输入商品ID:")
             exist = False
 
@@ -22,7 +21,6 @@ class ProductService:
                 continue
 
             while True:
-
                 name = input("请输入商品名称:")
 
                 if not name:
@@ -32,7 +30,6 @@ class ProductService:
                 break
 
             while True:
-
                 try:
                     price = float(input("请输入商品单价:"))
 
@@ -46,11 +43,8 @@ class ProductService:
                     print("请输入数字！")
 
             while True:
-
                 try:
-                    stock = int(
-                        input("请输入商品库存:")
-                    )
+                    stock = int(input("请输入商品库存:"))
 
                     if stock < 0:
                         print("库存不能为负数")
@@ -64,16 +58,19 @@ class ProductService:
             category = input("请输入商品分类:")
 
             product = Product(pid, name, price, stock, category)
-            ProductList.product_list.append(product)
-            DataManager.save_data()
-            print("商品添加成功！")
 
+            # ---- 事务保护 ----
+            try:
+                with Transaction("商品录入"):
+                    ProductList.product_list.append(product)
+                print("商品添加成功！")
+            except TransactionError as e:
+                print(f"商品添加失败: {e}")
             break
 
     # 展示所有商品
     @staticmethod
     def check_product():
-
         if not ProductList.product_list:
             print("暂无商品")
             return
@@ -95,15 +92,13 @@ class ProductService:
                 f"{product.category:<15}"
             )
 
-    # 修改商品信息
+    # 修改商品信息（事务保护）
     @staticmethod
     def update_product():
-
         pid = input("请输入修改商品ID:")
 
         for product in ProductList.product_list:
             if product.id == pid:
-
                 name = input("新的商品名称:")
 
                 if name:
@@ -112,7 +107,6 @@ class ProductService:
                 price = input("新的商品价格:")
 
                 if price:
-
                     try:
                         price = float(price)
 
@@ -147,16 +141,20 @@ class ProductService:
                 if category:
                     product.category = category
 
-                DataManager.save_data()
-                print("修改成功！")
+                # ---- 事务保护 ----
+                try:
+                    with Transaction("商品修改"):
+                        pass  # 修改已在内存中完成，事务负责持久化
+                    print("修改成功！")
+                except TransactionError as e:
+                    print(f"修改失败: {e}")
                 return
 
         print("商品不存在！")
 
-    # 删除商品
+    # 删除商品（事务保护）
     @staticmethod
     def delete_product():
-
         pid = input("请输入删除商品ID:")
 
         for product in ProductList.product_list:
@@ -164,38 +162,44 @@ class ProductService:
                 confirm = input("确认删除？(y/n):")
 
                 if confirm.lower() == "y":
-                    ProductList.product_list.remove(product)
-                    DataManager.save_data()
-                    print("删除成功")
+                    # ---- 事务保护 ----
+                    try:
+                        with Transaction("商品删除"):
+                            ProductList.product_list.remove(product)
+                        print("删除成功")
+                    except TransactionError as e:
+                        print(f"删除失败: {e}")
 
                 return
 
         print("商品不存在")
 
-    # 入库操作
+    # 入库操作（事务保护）
     @staticmethod
     def stock_input():
-
         pid = input("请输入商品ID:")
 
         for product in ProductList.product_list:
             if product.id == pid:
-
                 num = int(input("入库数量:"))
 
                 if num <= 0:
                     print("入库必须为正数")
                     return
 
-                product.stock += num
-                DataManager.save_data()
-
-                print("入库成功")
+                # ---- 事务保护 ----
+                try:
+                    with Transaction("商品入库"):
+                        product.stock += num
+                    print("入库成功")
+                except TransactionError as e:
+                    print(f"入库失败: {e}")
+                    # 库存已通过事务回滚恢复
                 return
 
         print("商品不存在")
 
-    # 出库操作
+    # 出库操作（事务保护）
     @staticmethod
     def stock_output():
         pid = input("请输入商品ID:")
@@ -212,9 +216,14 @@ class ProductService:
                     print("库存不足，禁止超卖")
                     return
 
-                product.stock -= num
-                DataManager.save_data()
-                print("出库成功")
+                # ---- 事务保护 ----
+                try:
+                    with Transaction("商品出库"):
+                        product.stock -= num
+                    print("出库成功")
+                except TransactionError as e:
+                    print(f"出库失败: {e}")
+                    # 库存已通过事务回滚恢复
                 return
 
         print("商品不存在")

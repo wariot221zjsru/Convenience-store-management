@@ -6,6 +6,27 @@
             "price": 12.0,
             "stock": 10,
             "category": "game"
+        },
+        {
+            "id": "02",
+            "name": "冰绿茶",
+            "price": 4.0,
+            "stock": 109,
+            "category": "食品饮料"
+        },
+        {
+            "id": "TEST001",
+            "name": "测试商品",
+            "price": 10.0,
+            "stock": 100,
+            "category": "测试"
+        },
+        {
+            "id": "TEST001",
+            "name": "测试商品",
+            "price": 10.0,
+            "stock": 100,
+            "category": "测试"
         }
     ],
     "members": [

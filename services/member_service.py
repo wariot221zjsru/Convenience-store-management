@@ -1,15 +1,14 @@
 from models.member import *
-from dao.data_manager import DataManager
+from services.transaction import Transaction, TransactionError
 from datetime import datetime
 
 
 class MemberService:
 
-    # 录入会员
+    # 录入会员（事务保护）
     @staticmethod
     def member_register():
         while True:
-
             mid = input("请输入会员ID:")
             exist = False
 
@@ -57,16 +56,20 @@ class MemberService:
             points = 0
             register_time = datetime.now().date()
             member = Member(mid, name, phone, points, register_time)
-            MemberList.member_list.append(member)
-            DataManager.save_data()
 
-            print("会员注册成功！")
+            # ---- 事务保护 ----
+            try:
+                with Transaction("会员注册"):
+                    MemberList.member_list.append(member)
+                print("会员注册成功！")
+            except TransactionError as e:
+                print(f"会员注册失败: {e}")
+                # 事务已自动回滚，member 对象不会被追加
             break
 
     # 列表展示所有会员
     @staticmethod
     def check_member():
-
         if not MemberList.member_list:
             print("暂无会员")
             return
@@ -91,7 +94,6 @@ class MemberService:
     # 手机号查询会员
     @staticmethod
     def select_member():
-
         phone = input("请输入会员手机号:")
 
         for member in MemberList.member_list:
@@ -117,11 +119,16 @@ class MemberService:
     # 会员95折
     @staticmethod
     def vip_amount(amount):
-        return round(amount * 0.95,2)
+        return round(amount * 0.95, 2)
 
-    # 增加积分
+    # 增加积分（事务保护）
     @staticmethod
     def add_points(member, amount):
         points = MemberService.points_conversion(amount)
-        member.points += points
-        DataManager.save_data()
+        try:
+            with Transaction("增加会员积分"):
+                member.points += points
+            print(f"积分增加成功: +{points}")
+        except TransactionError as e:
+            print(f"积分增加失败: {e}")
+            # member.points 已通过事务回滚恢复
